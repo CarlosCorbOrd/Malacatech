@@ -10,3 +10,5 @@ con antelación un traspaso de agua a este.
 Otra función sería mediante una api de google maps ser capaz de calcular las distancias que deberían de recorrer los vehículos de transporte con respecto de un 
 embalse a otro y así poder escoger cuál de los embalses cercanos que superen un cierto humbral, con respecto a su capacidad de agua,
 sería la opción más óptima para realizar el transporte de agua al embalse de riesgo
+
+Para abrir la aplicación, simplemente haz clic en el archivo index.html luego para leer más informa.
