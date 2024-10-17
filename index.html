@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Street Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="logo.png" width="80">
+            <h1 class="quicksand-title" id="title">Hydroco</h1>
+        </div>
+        <div class="input-section">
+            <div>
+                <label for="latitude">Embalse o ciudad</label>
+                <input placeholder="Embalse, ciudad o ciudad" required>
+                <label for="radius">Radio (km):</label>
+                <input placeholder="100" min="1" max="500" required>
+                <button id="fetchData">Buscar Embalses</button>
+            </div>
+            <button id="languageButton">Cambiar dioma</button>
+        </div>
+    </div>
+
+    <div id="mi_mapa" style="height: 400px;"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        let map = L.map('mi_mapa').setView([36.72390974225311, -4.481395955445592], 10);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Función para obtener los datos del JSON desde la API pública
+        async function obtenerPresas() {
+            const response = await fetch('https://gd02534a3a8d30d-malacatech.adb.eu-madrid-1.oraclecloudapps.com/ords/hydroco/listado_unico/');  // Reemplaza con tu URL pública
+            if(!response.ok){
+                throw new Error('Eror en la carga de datos');
+            }
+            const presas = await response.json();  // Convertir la respuesta a JSON
+            return presas.items;
+        }
+
+        async function cargarPresas() {
+            const presas = await obtenerPresas();  // Llama a la función que obtiene los datos JSON
+            console.log(presas);
+            
+            if(presas.length > 0){
+                presas.forEach(presa => {
+                    // Para cada presa, obtener las coordenadas (latitud y longitud)
+                    const lat = presa.x;  // Asegúrate de que estos campos coinciden con el JSON
+                    const lon = presa.y;
+                    const nombre = presa.nombre;
+                    const demarc = presa.demarc;
+                    const cauce = presa.cauce;
+    
+                    // Crear un marcador en el mapa para cada presa
+                    const marker = L.marker([lat, lon]).addTo(map);
+    
+                    // Añadir un popup con información de la presa
+                    marker.bindPopup(        
+                    'Nombre: ${nombre} <br>' +
+                    'Longitud: ${lon} <br>' +
+                    'Latitud: ${lat} <br>' +
+                    'Demarc: ${demarc} <br>' +
+                    'Couce: ${cauce} <br>');
+                });
+            } else {
+                console.error("La respuesta no es un array:", presas);
+            }
+        }
+
+        function locateUser() {
+            map.locate({ setView: true, maxZoom: 12 });
+
+            function onLocationFound(e) {
+                L.marker(e.latlng, {
+                    icon: L.divIcon({
+                        className: 'user-marker',
+                        html: '<div style="background-color: red; border-radius: 60%; width: 20px; height: 20px;"></div>'
+                    })
+                }).addTo(map).bindPopup("Estás aquí");
+
+                L.circle(e.latlng, {
+                    color: 'red',
+                    fillColor: '#30f',
+                    fillOpacity: 0.5
+                }).addTo(map);
+            }
+
+            map.on('locationfound', onLocationFound);
+            map.on('locationerror', function(e) {
+                alert(e.message);
+            });
+        }
+
+        locateUser();
+
+        L.marker([36.69760375504373, -4.586663243119224]).addTo(map).bindPopup(
+        'Nombre: Embalse de El Romeral <br>' +
+        'Longitud: -3.7038 <br>' +
+        'Latitud: 40.4168 <br>' +
+        'Agua Total: 150 millones de m³ <br>' +
+        'Agua Actual: 120 millones de m³ <br>' +
+        'Genera electricidad: Sí'
+        );
+
+        L.marker([36.77141117468066, -4.434485432366551]).addTo(map).bindPopup(
+            'Nombre: Embalse del Limonero <br>' +
+            'Longitud: 3.7038 <br>' +
+            'Latitud: 40.4168 <br>' +
+            'Agua Total: 150 millones de m³ <br>' +
+            'Agua Actual: 120 millones de m³ <br>' +
+            'Genera electricidad: Sí'
+            );
+
+        L.marker([36.893625102471724, -4.165062899013422]).addTo(map).bindPopup(
+            'Nombre: Embalse de La Viñuela <br>' +
+            'Longitud: 3.7038 <br>' +
+            'Latitud: 40.4168 <br>' +
+            'Agua Total: 150 millones de m³ <br>' +
+            'Agua Actual: 120 millones de m³ <br>' +
+            'Genera electricidad: Sí'
+            );
+
+        // Lógica para cambiar el idioma
+        let currentLanguage = "es"; // Idioma inicial
+
+        document.getElementById("languageButton").addEventListener("click", function() {
+            switch (currentLanguage) {
+                case "es":
+                    setLanguage("en");
+                    break;
+                case "en":
+                    setLanguage("fr");
+                    break;
+                case "fr":
+                    setLanguage("es");
+                    break;
+            }
+        });
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            if (lang === "es") {
+                document.getElementById("title").textContent = "Hydroco";
+                document.getElementById("label-latitude").textContent = "Embalse o ciudad:";
+                document.getElementById("label-radius").textContent = "Radio (km):";
+                document.getElementById("fetchData").textContent = "Buscar Embalses";
+                document.getElementById("languageButton").textContent = "Cambiar Idioma";
+            } else if (lang === "en") {
+                document.getElementById("title").textContent = "Hydroco";
+                document.getElementById("label-latitude").textContent = "Reservoir or City:";
+                document.getElementById("label-radius").textContent = "Radius (km):";
+                document.getElementById("fetchData").textContent = "Search Reservoirs";
+                document.getElementById("languageButton").textContent = "Change Language";
+            } else if (lang === "fr") {
+                document.getElementById("title").textContent = "Hydroco";
+                document.getElementById("label-latitude").textContent = "Réservoir ou Ville:";
+                document.getElementById("label-radius").textContent = "Rayon (km):";
+                document.getElementById("fetchData").textContent = "Chercher des Réservoirs";
+                document.getElementById("languageButton").textContent = "Changer de Langue";
+            }
+        }
+        
+        // Inicializar en español
+        setLanguage("es");
+
+        // Función para cargar y mostrar los puntos en el mapa
+         cargarPresas();
+    </script>
+
+    <hr>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-left">
+                <h2>MalacaTech</h2>
+                <button><a href="Info.html"> Información</a></button>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
