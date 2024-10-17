@@ -11,4 +11,4 @@ Otra función sería mediante una api de google maps ser capaz de calcular las d
 embalse a otro y así poder escoger cuál de los embalses cercanos que superen un cierto humbral, con respecto a su capacidad de agua,
 sería la opción más óptima para realizar el transporte de agua al embalse de riesgo
 
-Para abrir la aplicación, simplemente haz clic en el archivo index.html luego para leer más informa.
+Para abrir la aplicación, simplemente haz clic en el archivo index.html luego para leer más información hacer click en información.
